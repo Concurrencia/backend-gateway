@@ -1,0 +1,271 @@
+basePath: /api
+definitions:
+  models.Consultation:
+    properties:
+      dato1:
+        type: string
+      dato2:
+        type: string
+      id:
+        type: integer
+      result:
+        type: string
+      userId:
+        type: integer
+    type: object
+  models.CreateConsultationDto:
+    properties:
+      dato1:
+        type: string
+      dato2:
+        type: string
+      result:
+        type: string
+    type: object
+  models.RequestUserDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.User:
+    properties:
+      consultations:
+        items:
+          $ref: '#/definitions/models.Consultation'
+        type: array
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: soberkoder@swagger.io
+    name: API Support
+  description: This is an API lol
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Gang API
+  version: "1.0"
+paths:
+  /consultations:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Consultation'
+            type: array
+      summary: Get all Consultations
+      tags:
+      - consultations
+  /consultations/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Consultation'
+      summary: Creates a new Consultation
+      tags:
+      - consultations
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get details of all Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Get all Users
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Deletes user based on given ID
+      tags:
+      - users
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Retrieves user based on given ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestUserDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Update a  user based on given ID
+      tags:
+      - users
+  /users/{id}/consultations:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Consultation'
+            type: array
+      summary: Get all Consultations from a User
+      tags:
+      - consultations
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Create Consultation
+        in: body
+        name: Dto
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateConsultationDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Consultation'
+      summary: Creates a new Consultation
+      tags:
+      - consultations
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Login
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Create User
+        in: body
+        name: RequestUserDto
+        required: true
+        schema:
+          $ref: '#/definitions/models.RequestUserDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Creates a new User
+      tags:
+      - users
+swagger: "2.0"

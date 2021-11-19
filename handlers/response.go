@@ -33,6 +33,7 @@ func (resp *Response) send() {
 func sendData(rw http.ResponseWriter, data interface{}, status int) {
 	response := createDefaultResponse(rw, status)
 	response.Data = data
+	response.Message = "success"
 	response.send()
 }
 
