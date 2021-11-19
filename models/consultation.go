@@ -16,7 +16,7 @@ type CreateConsultationDto struct {
 	Result string `json:"result"`
 }
 
-// Users
+// Consultations
 type Consultations []Consultation
 
 func MigrarConsultations() {
