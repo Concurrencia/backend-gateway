@@ -2,6 +2,7 @@ package main
 
 import (
 	"apigo/handlers"
+	"apigo/models"
 	"log"
 	"net/http"
 
@@ -19,6 +20,6 @@ func requestHandler() {
 }
 
 func main() {
-	// run with fresh
+	models.MigrarUser()
 	requestHandler()
 }
