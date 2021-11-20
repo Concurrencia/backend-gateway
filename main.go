@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
@@ -30,7 +31,13 @@ func requestHandler() {
 	// Swagger
 	router.PathPrefix("/api/swagger").Handler(httpSwagger.WrapHandler)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	// cors
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(router)
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
 // @title Gang API
