@@ -2,22 +2,34 @@ basePath: /api
 definitions:
   models.Consultation:
     properties:
-      dato1:
+      cantMultas:
         type: string
-      dato2:
+      creditHistory:
         type: string
       id:
         type: integer
+      loanAmount:
+        type: string
+      nivelGravedadNum:
+        type: string
+      propertyAreaNum:
+        type: string
       result:
         type: string
       userId:
-        type: integer
+        type: string
     type: object
   models.CreateConsultationDto:
     properties:
-      dato1:
+      cantMultas:
         type: string
-      dato2:
+      creditHistory:
+        type: string
+      loanAmount:
+        type: string
+      nivelGravedadNum:
+        type: string
+      propertyAreaNum:
         type: string
       result:
         type: string
@@ -27,8 +39,6 @@ definitions:
       email:
         type: string
       password:
-        type: string
-      username:
         type: string
     type: object
   models.User:
@@ -40,10 +50,8 @@ definitions:
       email:
         type: string
       id:
-        type: integer
-      password:
         type: string
-      username:
+      password:
         type: string
     type: object
   models.UserLogin:
@@ -102,8 +110,6 @@ paths:
       - consultations
   /users:
     get:
-      consumes:
-      - application/json
       description: Get details of all Users
       produces:
       - application/json
@@ -141,7 +147,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -187,7 +193,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -208,7 +214,7 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: Create Consultation
         in: body
         name: Dto

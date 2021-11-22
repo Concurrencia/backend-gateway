@@ -87,9 +87,6 @@ var doc = `{
         "/users": {
             "get": {
                 "description": "Get details of all Users",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -188,7 +185,7 @@ var doc = `{
                 "summary": "Retrieves user based on given ID",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -284,7 +281,7 @@ var doc = `{
                 "summary": "Get all Consultations from a User",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -316,7 +313,7 @@ var doc = `{
                 "summary": "Creates a new Consultation",
                 "parameters": [
                     {
-                        "type": "integer",
+                        "type": "string",
                         "description": "User ID",
                         "name": "id",
                         "in": "path",
@@ -347,30 +344,48 @@ var doc = `{
         "models.Consultation": {
             "type": "object",
             "properties": {
-                "dato1": {
+                "cantMultas": {
                     "type": "string"
                 },
-                "dato2": {
+                "creditHistory": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
+                "loanAmount": {
+                    "type": "string"
+                },
+                "nivelGravedadNum": {
+                    "type": "string"
+                },
+                "propertyAreaNum": {
+                    "type": "string"
+                },
                 "result": {
                     "type": "string"
                 },
                 "userId": {
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         },
         "models.CreateConsultationDto": {
             "type": "object",
             "properties": {
-                "dato1": {
+                "cantMultas": {
                     "type": "string"
                 },
-                "dato2": {
+                "creditHistory": {
+                    "type": "string"
+                },
+                "loanAmount": {
+                    "type": "string"
+                },
+                "nivelGravedadNum": {
+                    "type": "string"
+                },
+                "propertyAreaNum": {
                     "type": "string"
                 },
                 "result": {
@@ -385,9 +400,6 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -405,12 +417,9 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
-                },
-                "password": {
                     "type": "string"
                 },
-                "username": {
+                "password": {
                     "type": "string"
                 }
             }

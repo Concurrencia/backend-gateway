@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"apigo/db"
 	"apigo/models"
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
-	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -15,13 +16,22 @@ import (
 // @Summary Get all Users
 // @Description Get details of all Users
 // @Tags users
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} models.Users
 // @Router /users [get]
 func GetUsers(rw http.ResponseWriter, r *http.Request) {
+
+	con, _ := net.Dial("tcp", "localhost:9001")
+	defer con.Close()
+
+	bufferIn := bufio.NewReader(con)
+	msg, _ := bufferIn.ReadString('\n')
+	msg = strings.TrimSpace(msg)
+
 	users := models.Users{}
-	db.Database.Find(&users)
+	json.Unmarshal([]byte(msg), &users)
+
+	fmt.Println(users)
 	sendData(rw, users, http.StatusOK)
 }
 
@@ -29,15 +39,32 @@ func GetUsers(rw http.ResponseWriter, r *http.Request) {
 // @Summary Retrieves user based on given ID
 // @Tags users
 // @Produce json
-// @Param id path integer true "User ID"
+// @Param id path string true "User ID"
 // @Success 200 {object} models.User
 // @Router /users/{id} [get]
 func GetUser(rw http.ResponseWriter, r *http.Request) {
-	if user, err := getUserById(r); err != nil {
-		sendError(rw, http.StatusNotFound, "User not found")
-	} else {
-		sendData(rw, user, http.StatusOK)
+
+	vars := mux.Vars(r)
+	userId := vars["id"]
+
+	con, _ := net.Dial("tcp", "localhost:9002")
+	defer con.Close()
+
+	fmt.Fprintln(con, userId)
+
+	bufferIn := bufio.NewReader(con)
+	msg, _ := bufferIn.ReadString('\n')
+	msg = strings.TrimSpace(msg)
+
+	user := models.User{}
+	json.Unmarshal([]byte(msg), &user)
+
+	if user.ID == "" {
+		sendError(rw, http.StatusNotFound, "User not found with Id")
+		return
 	}
+
+	sendData(rw, user, http.StatusOK)
 
 }
 
@@ -57,8 +84,24 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&user); err != nil {
 		sendError(rw, http.StatusUnprocessableEntity, "Unprocessable Entity. "+err.Error())
 	} else {
-		db.Database.Save(&user)
-		fmt.Println(user)
+
+		if user.Email == "" || user.Password == "" {
+			sendError(rw, http.StatusBadRequest, "Username or password can't be empty")
+			return
+		}
+
+		con, _ := net.Dial("tcp", "localhost:9000")
+		defer con.Close()
+
+		byteInfo, _ := json.Marshal(user)
+		fmt.Fprintln(con, string(byteInfo))
+
+		bufferIn := bufio.NewReader(con)
+		hashId, _ := bufferIn.ReadString('\n')
+		hashId = strings.TrimSpace(hashId)
+
+		user.ID = hashId
+
 		sendData(rw, user, http.StatusCreated)
 	}
 }
@@ -75,22 +118,6 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 // @Router /users/{id} [put]
 func UpdateUser(rw http.ResponseWriter, r *http.Request) {
 
-	updated_user := models.User{}
-	decoder := json.NewDecoder(r.Body)
-
-	if err := decoder.Decode(&updated_user); err != nil {
-		sendError(rw, http.StatusUnprocessableEntity, "Unprocessable Entity")
-		return
-	}
-
-	if old_user, err := getUserById(r); err != nil {
-		sendError(rw, http.StatusNotFound, "User not found")
-	} else {
-		updated_user.ID = old_user.ID
-		db.Database.Save(&updated_user)
-		sendData(rw, updated_user, http.StatusOK)
-	}
-
 }
 
 // DeleteUser godoc
@@ -102,12 +129,6 @@ func UpdateUser(rw http.ResponseWriter, r *http.Request) {
 // @Router /users/{id} [delete]
 func DeleteUser(rw http.ResponseWriter, r *http.Request) {
 
-	if user, err := getUserById(r); err != nil {
-		sendError(rw, http.StatusNotFound, "User not found")
-	} else {
-		db.Database.Delete(&user)
-		sendData(rw, user, http.StatusOK)
-	}
 }
 
 // Login godoc
@@ -120,7 +141,7 @@ func DeleteUser(rw http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.User
 // @Router /users/login [post]
 func Login(rw http.ResponseWriter, r *http.Request) {
-	user := models.User{}
+	//user := models.User{}
 	login_form := models.UserLogin{}
 	decoder := json.NewDecoder(r.Body)
 
@@ -129,23 +150,22 @@ func Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := db.Database.First(&user, "email = ? AND password = ?", login_form.Email, login_form.Password); err.Error != nil {
-		sendError(rw, http.StatusNotFound, "Wrong email or password")
+	con, _ := net.Dial("tcp", "localhost:9003")
+	defer con.Close()
+
+	fmt.Fprintln(con, login_form.Email)
+	fmt.Fprintln(con, login_form.Password)
+
+	bufferIn := bufio.NewReader(con)
+	msg, _ := bufferIn.ReadString('\n')
+	msg = strings.TrimSpace(msg)
+
+	user := models.User{}
+	json.Unmarshal([]byte(msg), &user)
+
+	if user.ID == "" {
+		sendError(rw, http.StatusNotFound, "User Not Found")
 	} else {
 		sendData(rw, user, http.StatusOK)
-	}
-
-}
-
-func getUserById(r *http.Request) (*models.User, error) {
-	//Obtener ID
-	vars := mux.Vars(r)
-	userId, _ := strconv.Atoi(vars["id"])
-	user := models.User{}
-
-	if err := db.Database.First(&user, userId); err.Error != nil {
-		return nil, err.Error
-	} else {
-		return &user, nil
 	}
 }

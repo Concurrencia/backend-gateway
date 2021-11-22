@@ -3,17 +3,23 @@ package models
 import "apigo/db"
 
 type Consultation struct {
-	ID     int64  `json:"id"`
-	Dato1  string `json:"dato1"`
-	Dato2  string `json:"dato2"`
-	Result string `json:"result"`
-	UserID int64  `json:"userId"`
+	ID               int64  `json:"id"`
+	LoanAmount       string `json:"loanAmount"`
+	CreditHistory    string `json:"creditHistory"`
+	PropertyAreaNum  string `json:"propertyAreaNum"`
+	CantMultas       string `json:"cantMultas"`
+	NivelGravedadNum string `json:"nivelGravedadNum"`
+	Result           string `json:"result"`
+	UserID           string `json:"userId"`
 }
 
 type CreateConsultationDto struct {
-	Dato1  string `json:"dato1"`
-	Dato2  string `json:"dato2"`
-	Result string `json:"result"`
+	LoanAmount       string `json:"loanAmount"`
+	CreditHistory    string `json:"creditHistory"`
+	PropertyAreaNum  string `json:"propertyAreaNum"`
+	CantMultas       string `json:"cantMultas"`
+	NivelGravedadNum string `json:"nivelGravedadNum"`
+	Result           string `json:"result"`
 }
 
 // Consultations

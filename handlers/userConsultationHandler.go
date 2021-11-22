@@ -1,11 +1,14 @@
 package handlers
 
 import (
-	"apigo/db"
+	"apigo/algorithm"
 	"apigo/models"
+	"bufio"
 	"encoding/json"
+	"fmt"
+	"net"
 	"net/http"
-	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -17,9 +20,18 @@ import (
 // @Success 200 {object} models.Consultations
 // @Router /consultations [get]
 func GetAllConsultations(rw http.ResponseWriter, r *http.Request) {
-	consultations := models.Consultations{}
-	db.Database.Find(&consultations)
-	sendData(rw, consultations, http.StatusOK)
+	con, _ := net.Dial("tcp", "localhost:9010")
+	defer con.Close()
+
+	bufferIn := bufio.NewReader(con)
+	msg, _ := bufferIn.ReadString('\n')
+	msg = strings.TrimSpace(msg)
+
+	consults := models.Consultations{}
+	json.Unmarshal([]byte(msg), &consults)
+
+	fmt.Println(consults)
+	sendData(rw, consults, http.StatusOK)
 }
 
 // GetAllConsultationsByUserId godoc
@@ -28,18 +40,33 @@ func GetAllConsultations(rw http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} models.Consultations
-// @Param id path integer true "User ID"
+// @Param id path string true "User ID"
 // @Router /users/{id}/consultations [get]
 func GetAllConsultationsByUserId(rw http.ResponseWriter, r *http.Request) {
-	user, err := getUserById(r)
-	if err != nil {
+	vars := mux.Vars(r)
+	userId := vars["id"]
+
+	con, _ := net.Dial("tcp", "localhost:9012")
+	defer con.Close()
+
+	fmt.Fprintln(con, userId)
+
+	bufferIn := bufio.NewReader(con)
+	msg, _ := bufferIn.ReadString('\n')
+	msg = strings.TrimSpace(msg)
+	if msg == "nil" {
 		sendError(rw, http.StatusNotFound, "User not found")
 		return
 	}
 
-	consultations := models.Consultations{}
-	db.Database.Find(&consultations, "user_id = ?", user.ID)
-	sendData(rw, consultations, http.StatusOK)
+	msg, _ = bufferIn.ReadString('\n')
+	msg = strings.TrimSpace(msg)
+
+	consults := models.Consultations{}
+	json.Unmarshal([]byte(msg), &consults)
+
+	fmt.Println(consults)
+	sendData(rw, consults, http.StatusOK)
 }
 
 // CreateConsultation godoc
@@ -47,28 +74,45 @@ func GetAllConsultationsByUserId(rw http.ResponseWriter, r *http.Request) {
 // @Tags consultations
 // @Accept  json
 // @Produce  json
-// @Param id path integer true "User ID"
+// @Param id path string true "User ID"
 // @Param Create Consultation Dto body models.CreateConsultationDto true "Create Consultation"
 // @Success 200 {object} models.Consultation
 // @Router /users/{id}/consultations [post]
 func CreateConsultation(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := vars["id"]
 
-	user, err := getUserById(r)
-	if err != nil {
-		sendError(rw, http.StatusNotFound, "User not found")
-		return
-	}
+	con, _ := net.Dial("tcp", "localhost:9011")
+	defer con.Close()
 
-	consultation := models.Consultation{}
+	fmt.Fprintln(con, userId)
+
+	consult := models.Consultation{}
 	decoder := json.NewDecoder(r.Body)
 
-	if err := decoder.Decode(&consultation); err != nil {
+	if err := decoder.Decode(&consult); err != nil {
 		sendError(rw, http.StatusUnprocessableEntity, "Unprocessable Entity. "+err.Error())
 	} else {
-		consultation.UserID = user.ID
-		db.Database.Save(&consultation)
-		sendData(rw, consultation, http.StatusCreated)
+		fmt.Println("ENTRO")
+		consult.Result = algorithm.RandomForestPredict(consult.LoanAmount, consult.CreditHistory, consult.PropertyAreaNum, consult.CantMultas, consult.NivelGravedadNum)
+		byteInfo, _ := json.Marshal(consult)
+		fmt.Fprintln(con, string(byteInfo))
+
+		bufferIn := bufio.NewReader(con)
+		msg, _ := bufferIn.ReadString('\n')
+		msg = strings.TrimSpace(msg)
+		if msg == "nil" {
+			sendError(rw, http.StatusNotFound, "User not found")
+			return
+		}
+		msg, _ = bufferIn.ReadString('\n')
+		msg = strings.TrimSpace(msg)
+
+		newConsult := models.Consultation{}
+		json.Unmarshal([]byte(msg), &newConsult)
+		sendData(rw, newConsult, http.StatusCreated)
 	}
+
 }
 
 // DeleteConsultation godoc
@@ -81,23 +125,4 @@ func CreateConsultation(rw http.ResponseWriter, r *http.Request) {
 // @Router /consultations/{id} [delete]
 func DeleteConsultation(rw http.ResponseWriter, r *http.Request) {
 
-	if consultation, err := getConsultationById(r); err != nil {
-		sendError(rw, http.StatusNotFound, "Consultation not found")
-	} else {
-		db.Database.Delete(&consultation)
-		sendData(rw, consultation, http.StatusOK)
-	}
-}
-
-func getConsultationById(r *http.Request) (*models.Consultation, error) {
-
-	vars := mux.Vars(r)
-	consultationId, _ := strconv.Atoi(vars["id"])
-	consultation := models.Consultation{}
-
-	if err := db.Database.First(&consultation, consultationId); err.Error != nil {
-		return nil, err.Error
-	} else {
-		return &consultation, nil
-	}
 }
