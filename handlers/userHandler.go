@@ -54,6 +54,7 @@ func GetUser(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(con, "getUserById")
 
 	fmt.Fprintln(con, userId)
+
 	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
 	msg = strings.TrimSpace(msg)

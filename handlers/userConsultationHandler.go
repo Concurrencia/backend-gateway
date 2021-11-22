@@ -94,6 +94,7 @@ func CreateConsultation(rw http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&consult); err != nil {
 		sendError(rw, http.StatusUnprocessableEntity, "Unprocessable Entity. "+err.Error())
 	} else {
+		// Prediccion
 		consult.Result = algorithm.RandomForestPredict(consult.LoanAmount, consult.CreditHistory, consult.PropertyAreaNum, consult.CantMultas, consult.NivelGravedadNum)
 		byteInfo, _ := json.Marshal(consult)
 		fmt.Fprintln(con, string(byteInfo))
