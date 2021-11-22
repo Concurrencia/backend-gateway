@@ -108,14 +108,9 @@ func RunRandomForestTraining() {
 		algo = append(algo, x)
 
 	}
-	fmt.Println(algo[0])
 	//aa = make([][] interface{},1)
 	//ee = append([14,17.0,1.0,2,8,4], 1)
 	//ee := forest.Predicate(parapredecir)
-	prediccion := forest.Predicate(algo[0])
-	fmt.Println("Prediccion de ", prueba, ": ", prediccion)
-	fmt.Println("Precision: ", correct)
-	fmt.Println("Cantidad de Predecidos: ", len(test_inputs))
 	fmt.Println("Porcentaje de predecidos correctamente: ", (float64(correct)/float64(len(test_inputs)))*100, "%")
 	fmt.Println("success rate:", 1.0-err_count/float64(len(test_inputs)))
 	//aaaa := forest.Predicate(test_inputs[i])

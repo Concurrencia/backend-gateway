@@ -19,15 +19,12 @@ func requestHandler() {
 	router.HandleFunc("/api/users", handlers.GetUsers).Methods("GET")
 	router.HandleFunc("/api/users/{id}", handlers.GetUser).Methods("GET")
 	router.HandleFunc("/api/users/register", handlers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users/{id}", handlers.UpdateUser).Methods("PUT")
-	router.HandleFunc("/api/users/{id}", handlers.DeleteUser).Methods("DELETE")
 	router.HandleFunc("/api/users/login", handlers.Login).Methods("POST")
 
 	// Consultations Endpoint
 	router.HandleFunc("/api/consultations", handlers.GetAllConsultations).Methods("GET")
 	router.HandleFunc("/api/users/{id}/consultations", handlers.GetAllConsultationsByUserId).Methods("GET")
 	router.HandleFunc("/api/users/{id}/consultations", handlers.CreateConsultation).Methods("POST")
-	router.HandleFunc("/api/consultations/{id}", handlers.DeleteConsultation).Methods("DELETE")
 	// Swagger
 	router.PathPrefix("/api/swagger").Handler(httpSwagger.WrapHandler)
 

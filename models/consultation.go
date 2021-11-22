@@ -1,7 +1,5 @@
 package models
 
-import "apigo/db"
-
 type Consultation struct {
 	ID               int64  `json:"id"`
 	LoanAmount       string `json:"loanAmount"`
@@ -24,7 +22,3 @@ type CreateConsultationDto struct {
 
 // Consultations
 type Consultations []Consultation
-
-func MigrarConsultations() {
-	db.Database.AutoMigrate(Consultation{})
-}

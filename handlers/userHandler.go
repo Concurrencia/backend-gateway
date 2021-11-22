@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"apigo/models"
+	"apigo/util"
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -21,8 +22,9 @@ import (
 // @Router /users [get]
 func GetUsers(rw http.ResponseWriter, r *http.Request) {
 
-	con, _ := net.Dial("tcp", "localhost:9001")
+	con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 	defer con.Close()
+	fmt.Fprintln(con, "getAllUsers")
 
 	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
@@ -47,11 +49,11 @@ func GetUser(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["id"]
 
-	con, _ := net.Dial("tcp", "localhost:9002")
+	con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 	defer con.Close()
+	fmt.Fprintln(con, "getUserById")
 
 	fmt.Fprintln(con, userId)
-
 	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
 	msg = strings.TrimSpace(msg)
@@ -90,8 +92,9 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		con, _ := net.Dial("tcp", "localhost:9000")
+		con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 		defer con.Close()
+		fmt.Fprintln(con, "createUser")
 
 		byteInfo, _ := json.Marshal(user)
 		fmt.Fprintln(con, string(byteInfo))
@@ -104,31 +107,6 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 
 		sendData(rw, user, http.StatusCreated)
 	}
-}
-
-// UpdateUser godoc
-// @Summary Update a  user based on given ID
-// @Description Update a user
-// @Tags users
-// @Accept  json
-// @Produce  json
-// @Param id path integer true "User ID"
-// @Param user body models.RequestUserDto true "Update user"
-// @Success 200 {object} models.User
-// @Router /users/{id} [put]
-func UpdateUser(rw http.ResponseWriter, r *http.Request) {
-
-}
-
-// DeleteUser godoc
-// @Summary Deletes user based on given ID
-// @Tags users
-// @Produce json
-// @Param id path integer true "User ID"
-// @Success 200 {object} models.User
-// @Router /users/{id} [delete]
-func DeleteUser(rw http.ResponseWriter, r *http.Request) {
-
 }
 
 // Login godoc
@@ -150,8 +128,9 @@ func Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	con, _ := net.Dial("tcp", "localhost:9003")
+	con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 	defer con.Close()
+	fmt.Fprintln(con, "getUserByEmailAndPassword")
 
 	fmt.Fprintln(con, login_form.Email)
 	fmt.Fprintln(con, login_form.Password)

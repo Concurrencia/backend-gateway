@@ -1,9 +1,5 @@
 package models
 
-import (
-	"apigo/db"
-)
-
 // User
 type User struct {
 	ID            string         `json:"id"`
@@ -32,7 +28,3 @@ type UserLogin struct {
 
 // Users
 type Users []User
-
-func MigrarUser() {
-	db.Database.AutoMigrate(User{})
-}

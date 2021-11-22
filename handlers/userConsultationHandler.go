@@ -3,6 +3,7 @@ package handlers
 import (
 	"apigo/algorithm"
 	"apigo/models"
+	"apigo/util"
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -20,9 +21,9 @@ import (
 // @Success 200 {object} models.Consultations
 // @Router /consultations [get]
 func GetAllConsultations(rw http.ResponseWriter, r *http.Request) {
-	con, _ := net.Dial("tcp", "localhost:9010")
+	con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 	defer con.Close()
-
+	fmt.Fprintln(con, "getAllConsults")
 	bufferIn := bufio.NewReader(con)
 	msg, _ := bufferIn.ReadString('\n')
 	msg = strings.TrimSpace(msg)
@@ -46,9 +47,9 @@ func GetAllConsultationsByUserId(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["id"]
 
-	con, _ := net.Dial("tcp", "localhost:9012")
+	con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 	defer con.Close()
-
+	fmt.Fprintln(con, "getAllConsultsByUserId")
 	fmt.Fprintln(con, userId)
 
 	bufferIn := bufio.NewReader(con)
@@ -82,18 +83,17 @@ func CreateConsultation(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["id"]
 
-	con, _ := net.Dial("tcp", "localhost:9011")
+	con, _ := net.Dial("tcp", util.GetRandomLocalHost())
 	defer con.Close()
+	fmt.Fprintln(con, "createConsult")
 
 	fmt.Fprintln(con, userId)
-
 	consult := models.Consultation{}
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&consult); err != nil {
 		sendError(rw, http.StatusUnprocessableEntity, "Unprocessable Entity. "+err.Error())
 	} else {
-		fmt.Println("ENTRO")
 		consult.Result = algorithm.RandomForestPredict(consult.LoanAmount, consult.CreditHistory, consult.PropertyAreaNum, consult.CantMultas, consult.NivelGravedadNum)
 		byteInfo, _ := json.Marshal(consult)
 		fmt.Fprintln(con, string(byteInfo))
@@ -112,17 +112,5 @@ func CreateConsultation(rw http.ResponseWriter, r *http.Request) {
 		json.Unmarshal([]byte(msg), &newConsult)
 		sendData(rw, newConsult, http.StatusCreated)
 	}
-
-}
-
-// DeleteConsultation godoc
-// @Summary Creates a new Consultation
-// @Tags consultations
-// @Accept  json
-// @Produce  json
-// @Param id path integer true "User ID"
-// @Success 200 {object} models.Consultation
-// @Router /consultations/{id} [delete]
-func DeleteConsultation(rw http.ResponseWriter, r *http.Request) {
 
 }
